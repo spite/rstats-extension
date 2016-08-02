@@ -206,6 +206,9 @@ function f() {
 
 		frameId++;
 
+		rAFValues.push( time - oTime );
+		oTime = time;
+
 	}
 
 	originalRAF( process );
@@ -220,7 +223,10 @@ function f() {
 		var wt = WebGLValues.median();
 		var fps = frameValues.median();
 
-		label.innerHTML = 'FPS: ' + fps.toFixed( 2 ) + '<br/>rAF: ' + raf.toFixed( 2 ) + 'ms ' + ( 1000 / raf ).toFixed( 2 ) + 'FPS<br/>EXT_disjoint_timer_query (GPU): ' + timeElapsed.toFixed( res ) + 'ms ' + ( 1000 / timeElapsed ).toFixed( res ) + 'FPS<br/>frame (CPU): ' + et.toFixed( res ) + 'ms ' + ( 1000 / et ).toFixed( res ) + 'FPS<br/>rIC (CPU): ' + rICet.toFixed( res ) + 'ms ' + ( 1000 / rICet ).toFixed( res ) + 'FPS<br/>Comp (CPU+GPU): ' + comp.toFixed(2 ) + 'ms ' + ( 1000 / comp ).toFixed( 2 ) + 'FPS<br/>WebGL CPU Ex: ' + wt.toFixed( 2 ) + 'ms ' + ( 1000 / wt ).toFixed( 2 ) + 'FPS<br/>drawCalls: ' + drawCalls;
+		var str = 'FPS: ' + fps.toFixed( 2 ) + '<br/>rAF: ' + raf.toFixed( 2 ) + 'ms ' + ( 1000 / raf ).toFixed( 2 ) + 'FPS<br/>EXT_disjoint_timer_query (GPU): ' + timeElapsed.toFixed( res ) + 'ms ' + ( 1000 / timeElapsed ).toFixed( res ) + 'FPS<br/>frame (CPU): ' + et.toFixed( res ) + 'ms ' + ( 1000 / et ).toFixed( res ) + 'FPS<br/>rIC (CPU): ' + rICet.toFixed( res ) + 'ms ' + ( 1000 / rICet ).toFixed( res ) + 'FPS<br/>Comp (CPU+GPU): ' + comp.toFixed(2 ) + 'ms ' + ( 1000 / comp ).toFixed( 2 ) + 'FPS<br/>WebGL CPU Ex: ' + wt.toFixed( 2 ) + 'ms ' + ( 1000 / wt ).toFixed( 2 ) + 'FPS<br/>drawCalls: ' + drawCalls;
+
+		label.innerHTML = str;
+		window.postMessage( { method: 'update', value: str }, '*' )
 
 	}
 
@@ -254,9 +260,11 @@ var button = document.getElementById( 'button' );
 button.addEventListener( 'click', function( e ) {
 	chrome.devtools.inspectedWindow.reload( {
 		ignoreCache: true,
-	//injectedScript: '(' + f.toString() + ')()'
+		//injectedScript: '(' + f.toString() + ')()'
 	} );
 } );
+
+var content = document.getElementById( 'content' );
 
 var backgroundPageConnection = chrome.runtime.connect({
 	name: 'panel'
@@ -280,6 +288,9 @@ backgroundPageConnection.onMessage.addListener( function( msg ) {
 		case 'loaded':
 		console.log( 'loaded' )
 		chrome.devtools.inspectedWindow.eval( 'start()' );
+		break;
+		case 'update':
+		content.innerHTML = msg.value;
 		break;
 	}
 } );
