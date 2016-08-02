@@ -197,9 +197,6 @@ function f() {
 		var et = performance.now() - time;
 		etValues.push( et );
 
-		rAFValues.push( time - oTime );
-		oTime = time;
-
 		frames++;
 		if( time > lastTime + 1000 ) {
 			frameValues.push( frames );
