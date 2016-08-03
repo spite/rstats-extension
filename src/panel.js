@@ -142,9 +142,14 @@ function f() {
 	var frameId = 0;
 	var disjointFrames = {};
 
+	function time(){
+		return performance.now();
+	}
+
 	function process() {
 
-		var time = performance.now();
+		rAFValues.push( time() - oTime );
+		oTime = time();
 
 		originalRAF( process );
 		requestIdleCallback( idle );
@@ -194,20 +199,17 @@ function f() {
 			queryExt.endQueryEXT( queryExt.TIME_ELAPSED_EXT );
 		} );
 
-		var et = performance.now() - time;
+		var et = performance.now() - time();
 		etValues.push( et );
 
 		frames++;
-		if( time > lastTime + 1000 ) {
-			frameValues.push( frames );
+		if( time() > lastTime + 1000 ) {
+			frameValues.push( frames * 1000 / ( time() - lastTime ) );
 			frames = 0;
-			lastTime = time;
+			lastTime = time();
 		}
 
 		frameId++;
-
-		rAFValues.push( time - oTime );
-		oTime = time;
 
 	}
 
